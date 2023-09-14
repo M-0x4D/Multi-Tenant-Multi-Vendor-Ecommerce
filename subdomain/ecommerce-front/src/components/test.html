@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    <script>
+
+        let x = 2;
+        let y = 4;
+
+
+        function outer()
+        {
+            return function inner()
+            {
+                let u = 9
+                return  x = y
+            }
+        }
+
+        let z = outer()
+        console.log(z.call())
+
+    </script>
+</body>
+</html>
