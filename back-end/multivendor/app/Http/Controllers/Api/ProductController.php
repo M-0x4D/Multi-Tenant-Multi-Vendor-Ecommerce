@@ -7,6 +7,7 @@ use App\Http\Requests\Products\StoreRequest;
 use App\Http\Requests\Products\UpdateRequest;
 use App\Models\Image;
 use App\Models\Product;
+use ErrorException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -67,15 +68,12 @@ class ProductController extends Controller
                 'message' => 'product created successfully',
                 'errors' => null,
                 'result' => 'success',
-                'data' => $product->where('id' , $product->id)->with(['images' , 'sizes'])->first()
+                'data' => $product->where('id', $product->id)->with(['images', 'sizes'])->first()
             ]);
-
-
-
         } catch (\Throwable $th) {
             DB::rollBack();
             // throw new HttpResponseException(handleResponse([]));
-            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR , 'message' => $th->getMessage(), 'line' => $th->getLine()];
+            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $th->getMessage(), 'line' => $th->getLine()];
         }
     }
 
@@ -88,17 +86,25 @@ class ProductController extends Controller
         try {
 
             $user = auth()->user();
-            $userFavourites = $user->favouriteProducts;
-
-            foreach ($userFavourites as $key => $userFavourite) {
+            if ($user) {
                 # code...
-                if ($userFavourite->id == $product->id) {
+                $userFavourites = $user->favouriteProducts;
+
+                foreach ($userFavourites as $key => $userFavourite) {
                     # code...
-                    $isFavourite = true;
+                    if ($userFavourite->id == $product->id) {
+                        # code...
+                        $isFavourite = true;
+                    }
                 }
             }
+
             //code...
-            $data = $product->with(['reviews' , 'images' , 'sizes' , 'offer'])->where('id' , $product->id)->first();
+            $data = $product->with(['reviews', 'images', 'sizes', 'offer'])->where('id', $product->id)->first();
+            $data->offerPrice = null;
+            if ($data->offer !== null) {
+                $data->offerPrice = $data->price - ($product->price * $data->offer->percentage) / 100;
+            }
             $data->isFavourite = $isFavourite;
             return handleResponse([
                 'status' => Response::HTTP_OK,
@@ -109,9 +115,8 @@ class ProductController extends Controller
             ]);
         } catch (\Throwable $th) {
             //throw $th;
-            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR,'message' => $th->getMessage(), 'line' => $th->getLine()];
+            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $th->getMessage(), 'line' => $th->getLine()];
         }
-
     }
 
     /**
@@ -143,12 +148,9 @@ class ProductController extends Controller
                 'result' => 'success',
                 'data' => $product
             ]);
-
-
-
         } catch (\Throwable $th) {
             DB::rollBack();
-            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR , 'message' => $th->getMessage(), 'line' => $th->getLine()];
+            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $th->getMessage(), 'line' => $th->getLine()];
         }
     }
 
@@ -172,7 +174,7 @@ class ProductController extends Controller
             ]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR , 'message' => $th->getMessage(), 'line' => $th->getLine()];
+            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $th->getMessage(), 'line' => $th->getLine()];
         }
     }
 }

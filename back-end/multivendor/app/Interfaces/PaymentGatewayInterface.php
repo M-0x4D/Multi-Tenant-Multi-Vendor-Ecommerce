@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 interface PaymentGatewayInterface
 {
-    public function handlePayment();
+    public static function handlePayment();
     public function paymentCancel(Request $request);
     public function paymentSuccess(Request $request);
 }

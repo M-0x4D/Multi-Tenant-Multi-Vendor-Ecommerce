@@ -73,6 +73,18 @@ class OfferController extends Controller
      */
     public function destroy(Offer $offer)
     {
-        //
+        try {
+            $offer->delete();
+            return handleResponse([
+                'status' => 200,
+                'message' => 'offer deleted successfully',
+                'errors' => null,
+                'result' => 'success',
+                'data' => $offer
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR , 'message' => $th->getMessage(), 'line' => $th->getLine()];
+        }
     }
 }

@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use App\Http\Controllers\Api\FavouriteController;
+use App\Http\Controllers\Api\Pay;
 use App\Http\Controllers\Api\SizeController;
 
 /*
@@ -39,6 +40,13 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class, 'cors',
 ])->prefix('v1')->group(function(){
+
+
+    Route::apiResource(
+        'cart',
+        CartController::class,
+    );
+
 
     Route::apiResource(
         'user',
@@ -61,6 +69,13 @@ Route::middleware([
         'product',
         ProductController::class,
     );
+
+
+    Route::get('handle-payment', [pay::class, 'pay'])->name('make.payment');
+    Route::get('cancel-payment', 'PayPalPaymentController@paymentCancel')->name('cancel.payment');
+
+    Route::get('payment-success', 'PayPalPaymentController@paymentSuccess')->name('success.payment');
+
 
 });
 
@@ -89,11 +104,8 @@ Route::middleware([
     // });
 
 
-    Route::get('handle-payment', [PayPalPaymentController::class, 'handlePayment'])->name('make.payment');
 
-    Route::get('cancel-payment', 'PayPalPaymentController@paymentCancel')->name('cancel.payment');
 
-    Route::get('payment-success', 'PayPalPaymentController@paymentSuccess')->name('success.payment');
 
 
 
@@ -128,10 +140,7 @@ Route::middleware([
     );
 
 
-    Route::apiResource(
-        'cart',
-        CartController::class,
-    );
+
 
 
 
