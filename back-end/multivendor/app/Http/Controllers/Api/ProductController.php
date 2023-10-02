@@ -191,7 +191,7 @@ class ProductController extends Controller
         try {
             //code...
             $searchTerm = $request->input('searchTerm');
-            $products = Product::where('name', 'like', '%' . $searchTerm . '%')
+            $products = Product::with('images')->where('name', 'like', '%' . $searchTerm . '%')
             ->orWhere('description', 'like', '%' . $searchTerm . '%')->get();
             return handleResponse([
                 'status' => 200,

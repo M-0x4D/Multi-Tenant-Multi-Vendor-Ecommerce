@@ -1,8 +1,5 @@
 <template>
-  <div
-    :key="componentKey"
-    class="flex min-w-[400px] flex-wrap gap-5 p-4 sm:ml-64"
-  >
+  <div class="flex min-w-[400px] flex-wrap gap-5 p-4 sm:ml-64">
     <div
       v-for="item in listItems"
       :key="item.id"
@@ -71,12 +68,12 @@
 
 <script>
 import axios from "axios";
+import { watch } from "vue";
 export default {
   name: "ContentCo",
   props: ["id"],
   data() {
     return {
-      componentKey: 0,
       listItems: [],
       totalItems: 0,
       baseUrl: "http://foo.multivendor.test",
@@ -99,6 +96,16 @@ export default {
     this.currentPage = res.data.data.current_page;
     this.itemsPerPage = res.data.data.per_page;
     this.totalItems = res.data.data.total;
+
+    watch(
+      () => this.$store.state.search,
+      () => {
+        // This function will be called whenever myState changes
+        if (this.$store.state.search) {
+          this.listItems = this.$store.state.search;
+        }
+      }
+    );
   },
   computed: {
     totalPages() {

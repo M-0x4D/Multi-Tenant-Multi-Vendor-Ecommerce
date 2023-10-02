@@ -225,7 +225,8 @@ export default {
         .then((res) => {
           this.searchResult = res.data.data;
           this.$store.state.search = this.searchResult;
-          console.log(this.$store.state.search);
+          // console.log(this.$store.state.search);
+          // this.$emit("search", this.searchResult);
         });
     },
   },
