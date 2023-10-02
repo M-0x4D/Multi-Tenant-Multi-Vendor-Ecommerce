@@ -27,6 +27,7 @@ class StoreRequest extends FormRequest
         return [
             'reviewable_id' => 'required|integer',
             'rate' => 'required|integer',
+            'name' => 'required'
         ];
     }
 

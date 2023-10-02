@@ -18,7 +18,7 @@ class Governrate extends Model
 
     public function shipping_adresses()
     {
-        return $this->hasMany('App\models\ShippingAddress');
+        return $this->hasMany(ShippingAddress::class);
     }
 
 }

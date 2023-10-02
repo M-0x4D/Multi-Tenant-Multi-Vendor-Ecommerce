@@ -52,9 +52,15 @@ class User extends Authenticatable
 
     }
 
+    function carts()
+    {
+        return $this->belongsToMany(Cart::class , 'product_cart' , 'user_id' , 'cart_id');
+
+    }
+
 
     function favourites(){
-        return $this->belongsToMany(Favourite::class , 'favourite_user');
+        return $this->belongsToMany(Product::class , 'favourite_user');
     }
 
 

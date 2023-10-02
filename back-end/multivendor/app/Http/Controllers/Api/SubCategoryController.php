@@ -18,7 +18,21 @@ class SubCategoryController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            //code...
+            $SubCategories = SubCategory::get();
+            return handleResponse([
+                'status' => 200,
+                'message' => 'subcategory returned successfully',
+                'errors' => null,
+                'result' => 'success',
+                'data' => $SubCategories
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR,'message' => $th->getMessage(), 'line' => $th->getLine()];
+        }
+
     }
 
     /**

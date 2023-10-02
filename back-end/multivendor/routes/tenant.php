@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CalcsController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OfferController;
@@ -19,8 +20,12 @@ use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use App\Http\Controllers\Api\FavouriteController;
+use App\Http\Controllers\Api\GovernrateController;
 use App\Http\Controllers\Api\Pay;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\SizeController;
+use Illuminate\Routing\RouteCollection;
+use Illuminate\Support\Facades\Http;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,10 +47,21 @@ Route::middleware([
 ])->prefix('v1')->group(function(){
 
 
-    Route::apiResource(
-        'cart',
-        CartController::class,
-    );
+
+    if (isset(getallheaders()['Authorization'])) {
+
+
+        Route::apiResource(
+            'cart',
+            CartController::class,
+        )->middleware("auth:users");
+    }
+    else{
+        Route::apiResource(
+            'cart',
+            CartController::class,
+        );
+    }
 
 
     Route::apiResource(
@@ -65,13 +81,26 @@ Route::middleware([
         SubCategoryController::class,
     );
 
+ if (isset(getallheaders()['Authorization'])) {
+    # code...
+    Route::apiResource(
+        'product',
+        ProductController::class,
+    )->middleware('auth:users');
+
+    Route::get('search', [ProductController::class, 'searchProducts']);
+ }
+else {
+    # code...
     Route::apiResource(
         'product',
         ProductController::class,
     );
 
+    Route::get('search', [ProductController::class, 'searchProducts']);
+}
 
-    Route::get('handle-payment', [pay::class, 'pay'])->name('make.payment');
+
     Route::get('cancel-payment', 'PayPalPaymentController@paymentCancel')->name('cancel.payment');
 
     Route::get('payment-success', 'PayPalPaymentController@paymentSuccess')->name('success.payment');
@@ -105,6 +134,7 @@ Route::middleware([
 
 
 
+    Route::post('handle-payment', [pay::class, 'pay'])->name('make.payment');
 
 
 
@@ -134,15 +164,12 @@ Route::middleware([
     );
 
 
+
+
     Route::apiResource(
         'favourite',
         FavouriteController::class,
     );
-
-
-
-
-
 
 
 
@@ -171,6 +198,24 @@ Route::middleware([
         'address',
         AddressController::class,
     );
+
+    Route::apiResource(
+        'payment-method',
+        PaymentController::class,
+    );
+    Route::apiResource(
+        'governrate',
+        GovernrateController::class,
+    );
+
+
+    Route::controller(CalcsController::class)->group(function(){
+        Route::post('total-price' , 'calculateTotalPrice');
+        Route::post('sub-total' , 'calculateSubPrice');
+        Route::post('shipping-price' , 'calculateShippingPrice');
+    });
+
+
 });
 
 

@@ -7,6 +7,7 @@ use App\Http\Requests\Products\StoreRequest;
 use App\Http\Requests\Products\UpdateRequest;
 use App\Models\Image;
 use App\Models\Product;
+use App\Models\ProductCart;
 use ErrorException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
@@ -83,22 +84,25 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $isFavourite = false;
+        $inCart = false;
         try {
 
             $user = auth()->user();
+            $cartQty = ProductCart::where(['user_id' => $user->id, 'product_id' => $product->id])->first();
+            if (isset($cartQty)) {
+                $cartQty = $cartQty->qty;
+            }
             if ($user) {
-                # code...
-                $userFavourites = $user->favouriteProducts;
-
-                foreach ($userFavourites as $key => $userFavourite) {
+                if ($product->favourites()->where('user_id', $user->id)->exists()) {
                     # code...
-                    if ($userFavourite->id == $product->id) {
-                        # code...
-                        $isFavourite = true;
-                    }
+                    $isFavourite = true;
+                }
+
+                if ($product->carts()->where('product_cart.user_id', $user->id)->exists()) {
+                    # code...
+                    $inCart = true;
                 }
             }
-
             //code...
             $data = $product->with(['reviews', 'images', 'sizes', 'offer'])->where('id', $product->id)->first();
             $data->offerPrice = null;
@@ -106,6 +110,8 @@ class ProductController extends Controller
                 $data->offerPrice = $data->price - ($product->price * $data->offer->percentage) / 100;
             }
             $data->isFavourite = $isFavourite;
+            $data->inCart = $inCart;
+            $data->cartQty = $cartQty;
             return handleResponse([
                 'status' => Response::HTTP_OK,
                 'message' => 'product returned successfully',
@@ -173,6 +179,29 @@ class ProductController extends Controller
                 'data' => $product
             ]);
         } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $th->getMessage(), 'line' => $th->getLine()];
+        }
+    }
+
+
+
+    public function searchProducts(Request $request)
+    {
+        try {
+            //code...
+            $searchTerm = $request->input('searchTerm');
+            $products = Product::where('name', 'like', '%' . $searchTerm . '%')
+            ->orWhere('description', 'like', '%' . $searchTerm . '%')->get();
+            return handleResponse([
+                'status' => 200,
+                'message' => 'search products returned successfully',
+                'errors' => null,
+                'result' => 'success',
+                'data' => $products
+            ]);
+        } catch (\Throwable $th) {
+            //throw $th;
             DB::rollBack();
             return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $th->getMessage(), 'line' => $th->getLine()];
         }

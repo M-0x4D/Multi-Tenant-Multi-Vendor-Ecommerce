@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Payment;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Order\StoreRequest;
 use App\Interfaces\PaymentGatewayInterface;
 use Illuminate\Http\Request;
 use Srmklive\PayPal\Services\ExpressCheckout;
@@ -11,9 +12,10 @@ use Srmklive\PayPal\Services\PayPal as PayPalClient;
 class PayPalPaymentController implements PaymentGatewayInterface
 {
 
-    public static function handlePayment()
+    public static function handlePayment(StoreRequest $request)
 
     {
+
 
         try {
             //code...
@@ -40,7 +42,7 @@ class PayPalPaymentController implements PaymentGatewayInterface
             // redirect to approve href
             foreach ($response['links'] as $links) {
                 if ($links['rel'] == 'approve') {
-                    return redirect()->away($links['href']);
+                    return $links['href'];
                 }
             }
             return redirect()

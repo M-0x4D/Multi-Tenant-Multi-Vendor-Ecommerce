@@ -13,7 +13,7 @@ class ShippingAddress extends Model
 
     public function governrate()
     {
-        return $this->belongsTo('App\models\Governrate');
+        return $this->belongsTo(Governrate::class);
     }
 
     function user(){

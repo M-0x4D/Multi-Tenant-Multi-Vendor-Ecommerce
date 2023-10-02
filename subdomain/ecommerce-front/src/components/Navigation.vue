@@ -1,7 +1,7 @@
 <template>
   <nav class="bg-white border-gray-200 dark:bg-gray-900">
     <div
-      class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"
+      class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto"
     >
       <a href="https://flowbite.com/" class="flex items-center">
         <img
@@ -62,6 +62,8 @@
           </div>
           <input
             type="text"
+            @input="handleSearch"
+            v-model="this.searchWord"
             id="search-navbar"
             class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search..."
@@ -126,27 +128,26 @@
         <ul
           class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700"
         >
-          <li>
+          <li @mouseover="activateCategory" @mouseleave="deactivateCategory">
             <a
+              v-for="category in this.categories"
+              :key="category.id"
               href="#"
               class="block py-2 pl-3 pr-4 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500"
               aria-current="page"
-              >Home</a
-            >
-          </li>
-          <li>
-            <a
-              href="#"
-              class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
-              >About</a
-            >
-          </li>
-          <li>
-            <a
-              href="#"
-              class="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
-              >Services</a
-            >
+              >{{ category.name }}
+              <ul
+                class="flex items-center flex-col z-100 gap-1 w-fit bg-white"
+                v-if="isActive"
+              >
+                <li
+                  v-for="subcategory in category.subCategories"
+                  :key="subcategory"
+                >
+                  {{ subcategory.name }}
+                </li>
+              </ul>
+            </a>
           </li>
         </ul>
       </div>
@@ -155,10 +156,78 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "NavBar",
-  mounted: () => {
-    console.log("nav");
+  data() {
+    return {
+      categories: [],
+      subCategories: [],
+      subCategoriesWithId: [],
+      hoveredCategoryId: null,
+      isActive: false,
+      searchWord: "",
+      searchResult: [],
+      config: {
+        headers: {
+          Authorization:
+            "Bearer wppO9MjAnIlKDY8LTTGDLZk1oszOrKAuoPhDKlpF1823212b",
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      },
+    };
+  },
+  mounted: async function () {
+    // const config = {
+    //   headers: {
+    //     Authorization:
+    //       "Bearer wppO9MjAnIlKDY8LTTGDLZk1oszOrKAuoPhDKlpF1823212b",
+    //     Accept: "application/json",
+    //     "Content-Type": "application/json",
+    //   },
+    // };
+    await axios
+      .get("http://foo.multivendor.test/v1/category", this.config)
+      .then((res) => {
+        this.categories = res.data.data;
+      });
+
+    await axios
+      .get("http://foo.multivendor.test/v1/subcategory", this.config)
+      .then((res) => {
+        this.subCategories = res.data.data;
+      });
+
+    this.categories.forEach((category) => {
+      this.subCategories.forEach((subcategory) => {
+        if (category.id == subcategory.category_id) {
+          this.subCategoriesWithId.push(subcategory);
+        }
+      });
+      category.subCategories = this.subCategoriesWithId;
+      this.subCategoriesWithId = null;
+    });
+  },
+  methods: {
+    activateCategory() {
+      this.isActive = true;
+    },
+    deactivateCategory() {
+      this.isActive = false;
+    },
+    async handleSearch() {
+      await axios
+        .get(
+          "http://foo.multivendor.test/v1/search?searchTerm=" + this.searchWord,
+          this.config
+        )
+        .then((res) => {
+          this.searchResult = res.data.data;
+          this.$store.state.search = this.searchResult;
+          console.log(this.$store.state.search);
+        });
+    },
   },
 };
 </script>

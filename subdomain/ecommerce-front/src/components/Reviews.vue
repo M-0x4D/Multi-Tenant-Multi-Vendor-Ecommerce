@@ -1,137 +1,187 @@
 <template>
-  <div class="mx-auto text-center md:max-w-xl lg:max-w-3xl">
-    <h3 class="mb-6 text-3xl font-bold text-neutral-800 dark:text-neutral-200">
-      Testimonials
-    </h3>
-    <p class="mb-6 pb-2 md:mb-12 md:pb-0">
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fugit, error
-      amet numquam iure provident voluptate esse quasi, veritatis totam voluptas
-      nostrum quisquam eum porro a pariatur veniam.
-    </p>
-  </div>
-
-  <!-- Container for the Testimonials -->
-  <div class="grid gap-6 text-center md:grid-cols-2 lg:gap-12">
-    <!-- Second Testimonial -->
-    <div class="mb-12 md:mb-0">
-      <div class="mb-6 flex justify-center">
-        <img
-          src="https://tecdn.b-cdn.net/img/Photos/Avatars/img%20(2).jpg"
-          class="w-32 rounded-full shadow-lg dark:shadow-black/30"
+  <div class="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
+    <h2 class="text-2xl font-semibold mb-4">Write a Review</h2>
+    <form v-on:submit.prevent="addReview">
+      <!-- Name Input -->
+      <div class="mb-4">
+        <label for="name" class="block text-gray-700 font-medium"
+          >Your Name</label
+        >
+        <input
+          type="text"
+          id="name"
+          v-model="name"
+          name="name"
+          class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+          required
         />
       </div>
-      <h5 class="mb-4 text-xl font-semibold">Lisa tet</h5>
-      <h6 class="mb-4 font-semibold text-primary dark:text-primary-500">
-        Graphic Designer
-      </h6>
-      <p class="mb-4">
+
+      <!-- Rating Input -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium">Rating</label>
+        <div class="flex items-center">
+          <!-- You can use a set of radio buttons or a select dropdown for rating -->
+          <select
+            v-model="rate"
+            id="rating"
+            name="rating"
+            class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+          >
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Review Text Input -->
+      <div class="mb-4">
+        <label for="review" class="block text-gray-700 font-medium"
+          >Review</label
+        >
+        <textarea
+          id="review"
+          name="review"
+          v-model="comment"
+          rows="4"
+          class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+          required
+        ></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="text-center">
+        <button
+          type="submit"
+          class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out"
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div
+    v-for="review in reviews"
+    :key="review"
+    class="bg-white rounded-lg shadow-lg p-6 shadow-slate-200 m-3"
+  >
+    <!-- Review Header -->
+    <div class="flex items-center">
+      <img
+        src="user-avatar.jpg"
+        alt="User Avatar"
+        class="w-12 h-12 rounded-full mr-4"
+      />
+      <div>
+        <h3 class="text-lg font-semibold">{{ review.name }}</h3>
+        <p class="text-gray-600">Posted on {{ review.created_at }}</p>
+      </div>
+    </div>
+
+    <!-- Review Content -->
+    <p class="mt-4">
+      {{ review.comment }}
+    </p>
+
+    <!-- Review Rating -->
+    <div class="mt-4 flex items-center">
+      <div class="flex">
         <svg
           xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-yellow-500"
+          viewBox="0 0 20 20"
           fill="currentColor"
-          class="inline-block h-7 w-7 pr-2"
-          viewBox="0 0 24 24"
         >
           <path
-            d="M13 14.725c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.163 3.742-4.38 5.746 2.491.392 4.396 2.547 4.396 5.149 0 3.182-2.584 4.979-5.199 4.979-3.015 0-5.801-2.305-5.801-6.275zm-13 0c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.163 3.742-4.38 5.746 2.491.392 4.396 2.547 4.396 5.149 0 3.182-2.584 4.979-5.199 4.979-3.015 0-5.801-2.305-5.801-6.275z"
+            d="M10 1l2.4 5.6h5.6l-4.4 3.6 1.6 6.4-5.6-4.4-5.6 4.4 1.6-6.4-4.4-3.6h5.6z"
           />
         </svg>
-        Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis
-        suscipit laboriosam, nisi ut aliquid commodi.
-      </p>
-      <ul class="mb-0 flex items-center justify-center">
-        <li>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            class="h-5 w-5 text-yellow-500"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </li>
-        <li>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            class="h-5 w-5 text-yellow-500"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </li>
-        <li>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            class="h-5 w-5 text-yellow-500"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </li>
-        <li>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            class="h-5 w-5 text-yellow-500"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </li>
-        <li>
-          <svg
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            class="h-5 w-5 text-yellow-500"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </li>
-        <li>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            class="h-5 w-5 text-yellow-500"
-          >
-            <path
-              d="M13 14.725c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.163 3.742-4.38 5.746 2.491.392 4.396 2.547 4.396 5.149 0 3.182-2.584 4.979-5.199 4.979-3.015 0-5.801-2.305-5.801-6.275zm-13 0c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.163 3.742-4.38 5.746 2.491.392 4.396 2.547 4.396 5.149 0 3.182-2.584 4.979-5.199 4.979-3.015 0-5.801-2.305-5.801-6.275z"
-            />
-          </svg>
-        </li>
-      </ul>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-yellow-500"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            d="M10 1l2.4 5.6h5.6l-4.4 3.6 1.6 6.4-5.6-4.4-5.6 4.4 1.6-6.4-4.4-3.6h5.6z"
+          />
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-yellow-500"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            d="M10 1l2.4 5.6h5.6l-4.4 3.6 1.6 6.4-5.6-4.4-5.6 4.4 1.6-6.4-4.4-3.6h5.6z"
+          />
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-yellow-500"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            d="M10 1l2.4 5.6h5.6l-4.4 3.6 1.6 6.4-5.6-4.4-5.6 4.4 1.6-6.4-4.4-3.6h5.6z"
+          />
+        </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-gray-300"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            d="M10 1l2.4 5.6h5.6l-4.4 3.6 1.6 6.4-5.6-4.4-5.6 4.4 1.6-6.4-4.4-3.6h5.6z"
+          />
+        </svg>
+      </div>
+      <p class="text-gray-600 ml-2">{{ review.rate }}</p>
     </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: "ReviewsComponent",
+  data: function () {
+    return {
+      name: "",
+      rate: 1,
+      comment: "",
+    };
+  },
+  props: { reviews: Array },
+  mounted() {},
+  methods: {
+    addReview: async function () {
+      const formData = {
+        name: this.name,
+        comment: this.comment,
+        rate: this.rate,
+        type: "product",
+        reviewable_id: this.$store.state.productId,
+      };
+      await axios
+        .post("http://foo.multivendor.test/v1/review", formData, {
+          headers: {
+            Authorization:
+              "Bearer wppO9MjAnIlKDY8LTTGDLZk1oszOrKAuoPhDKlpF1823212b",
+          },
+        })
+        .then(() => {
+          // console.log("kdu");
+          // this.reviews = [...this.reviews, res.data];
+          this.$router.go();
+        });
+    },
+  },
 };
 </script>

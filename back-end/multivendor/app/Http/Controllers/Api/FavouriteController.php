@@ -33,7 +33,7 @@ class FavouriteController extends Controller
             ]);
         } catch (\Throwable $th) {
             //throw $th;
-            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR,'message' => $th->getMessage(), 'line' => $th->getLine()];
+            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $th->getMessage(), 'line' => $th->getLine()];
         }
     }
 
@@ -45,30 +45,33 @@ class FavouriteController extends Controller
         try {
 
             $user = auth()->user();
-            $userFavourites = $user->favouriteProducts;
 
-            foreach ($userFavourites as $key => $userFavourite) {
+            if ($user->favourites()->where('product_id', $request->product_id)->exists()) {
                 # code...
-                if ($userFavourite->id == $request->product_id) {
-                    # code...
-                    throw new \ErrorException('this id is already favourite');
-                }
+                $res = $user->favourites()->detach($request->product_id);
+                return handleResponse([
+                    'status' => 202,
+                    'message' => 'product deleted from favourites successfully',
+                    'errors' => null,
+                    'result' => 'success',
+                    'data' => $res
+                ]);
             }
-        $favourite = Favourite::create();
-        FavouriteUser::updateOrCreate([
-            'user_id' => auth()->user()->id,
-            'product_id' => $request->product_id,
-            'favourite_id' => $favourite->id
-        ]);
 
-        return handleResponse([
-            'status' => 200,
-            'message' => 'product added to favourites successfully',
-            'errors' => null,
-            'result' => 'success',
-            'data' => $favourite
-        ]);
+            $favourite = Favourite::create();
+            FavouriteUser::updateOrCreate([
+                'user_id' => auth()->user()->id,
+                'product_id' => $request->product_id,
+                'favourite_id' => $favourite->id
+            ]);
 
+            return handleResponse([
+                'status' => 200,
+                'message' => 'product added to favourites successfully',
+                'errors' => null,
+                'result' => 'success',
+                'data' => $favourite
+            ]);
         } catch (\Throwable $th) {
             //throw $th;
             DB::rollBack();
@@ -101,8 +104,8 @@ class FavouriteController extends Controller
     {
 
         try {
-            Favourite::where('id' , $id)->delete();
-            $product = Product::where('id' , $id)->first();
+            Favourite::where('id', $id)->delete();
+            $product = Product::where('id', $id)->first();
 
             FavouriteUser::where([
                 'user_id' => auth()->user()->id,
@@ -120,7 +123,7 @@ class FavouriteController extends Controller
             ]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR , 'message' => $th->getMessage(), 'line' => $th->getLine()];
+            return ['status' => Response::HTTP_INTERNAL_SERVER_ERROR, 'message' => $th->getMessage(), 'line' => $th->getLine()];
         }
     }
 }

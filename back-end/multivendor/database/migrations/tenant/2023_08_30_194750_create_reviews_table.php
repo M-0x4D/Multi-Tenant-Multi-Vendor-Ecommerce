@@ -15,6 +15,7 @@ class CreateReviewsTable extends Migration {
 			$table->integer('reviewable_id');
             $table->integer('user_id')->nullable();
 			$table->string('reviewable_type', 100);
+            $table->string('name' , 100);
 		});
 	}
 

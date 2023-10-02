@@ -9,7 +9,7 @@ class Review extends Model
 
     protected $table = 'reviews';
     public $timestamps = true;
-    protected $fillable = array('rate', 'comment', 'reviewable_id', 'reviewable_type', 'user_id');
+    protected $fillable = array('rate', 'comment', 'reviewable_id', 'reviewable_type', 'user_id' , 'name');
 
 
      /**

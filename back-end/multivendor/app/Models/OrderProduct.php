@@ -9,6 +9,6 @@ class OrderProduct extends Model
 
     protected $table = 'order_product';
     public $timestamps = true;
-    protected $fillable = array('order_id', 'product_id', 'price_at_this_time');
+    protected $fillable = array('order_id', 'product_id', 'price_at_this_time' , 'qty');
 
 }

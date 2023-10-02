@@ -46,7 +46,8 @@ class ReviewController extends Controller
                 'reviewable_type' => $reviewableType,
                 'rate' => $request->rate,
                 'comment' => $request->comment ?? null,
-                'user_id' => auth()->user()->id
+                'user_id' => auth()->user()->id,
+                'name' => $request->name
             ]);
             DB::commit();
             return handleResponse([

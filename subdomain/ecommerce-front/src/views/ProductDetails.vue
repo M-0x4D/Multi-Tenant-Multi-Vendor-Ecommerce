@@ -117,7 +117,7 @@
           <div
             class="flex mt-6 items-center pb-5 border-b-2 border-gray-200 mb-5"
           >
-            <div class="flex">
+            <!-- <div class="flex">
               <span class="mr-3">Color</span>
               <button
                 class="border-2 border-gray-300 rounded-full w-6 h-6 focus:outline-none"
@@ -128,7 +128,7 @@
               <button
                 class="border-2 border-gray-300 ml-1 bg-red-500 rounded-full w-6 h-6 focus:outline-none"
               ></button>
-            </div>
+            </div> -->
             <div class="flex ml-6 items-center">
               <span class="mr-3">Size</span>
               <div class="relative">
@@ -183,10 +183,65 @@
 
             <button
               @click="this.addToCart()"
+              id="addToCart"
               class="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded bg-tahiti-test"
             >
               Add To Cart
             </button>
+
+            <div
+              id="counter"
+              class="hidden items-center justify-center gap-5 h-10"
+            >
+              <div class="flex items-center border-gray-100">
+                <span
+                  @click="this.decreaseValue"
+                  class="cursor-pointer rounded-l bg-gray-100 py-1 px-3.5 duration-100 hover:bg-blue-500 hover:text-blue-50"
+                >
+                  -
+                </span>
+                <input
+                  class="h-8 w-8 border bg-white text-center text-xs outline-none"
+                  type="number"
+                  :value="this.qty"
+                  min="1"
+                />
+                <span
+                  @click="this.increaseValue"
+                  class="cursor-pointer rounded-r bg-gray-100 py-1 px-3 duration-100 hover:bg-blue-500 hover:text-blue-50"
+                >
+                  +
+                </span>
+              </div>
+              <button
+                @click="goToCart"
+                class="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded bg-tahiti-test"
+              >
+                Go To Cart
+              </button>
+              <!-- <div
+                class="flex justify-center items-center bg-red-500 w-10 h-10"
+                id="decrease"
+                @click="this.decreaseValue"
+                value="this.qty"
+              >
+                -
+              </div>
+              <input
+                class="flex w-10 align-middle justify-center h-10"
+                type="number"
+                id="number"
+                :value="this.qty"
+              />
+              <div
+                class="flex justify-center items-center bg-red-500 w-10 h-10"
+                id="increase"
+                @click="this.increaseValue"
+                value="this.qty"
+              >
+                +
+              </div> -->
+            </div>
 
             <button
               id="love"
@@ -254,7 +309,7 @@
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              class="w-4 h-4 text-red-500"
+              class="w-4 h-4 text-red-500 hover:text-red-600"
               viewBox="0 0 24 24"
             >
               <path
@@ -282,7 +337,9 @@
       </div>
     </div>
   </section>
-  <ReviewsComponent />
+  <section class="block mt-10 mb-10 p-8">
+    <ReviewsComponent :reviews="this.details.reviews" />
+  </section>
 </template>
 
 <script>
@@ -294,17 +351,37 @@ export default {
   data() {
     return {
       details: {},
-      productIds: [],
+      productId: 0,
       reviewsCount: 0,
       img: "",
       sizes: [],
+      qty: 1,
     };
   },
   async mounted() {
-    const res = await axios.get(
-      "http://foo.multivendor.test/v1/product/" + this.$route.params.id
-    );
-    this.details = res.data.data;
+    const config = {
+      headers: {
+        Authorization:
+          "Bearer wppO9MjAnIlKDY8LTTGDLZk1oszOrKAuoPhDKlpF1823212b",
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    };
+    await axios
+      .get(
+        "http://foo.multivendor.test/v1/product/" + this.$route.params.id,
+        config
+      )
+      .then((res) => {
+        this.details = res.data.data;
+        this.$store.state.reviews = this.details.reviews;
+        this.$store.state.productId = this.details.id;
+      });
+
+    if (this.details.inCart == true) {
+      document.getElementById("addToCart").style.display = "none";
+      document.getElementById("counter").style.display = "flex";
+    }
     if (this.details.offerPrice !== null) {
       document.getElementById("myDIV").style.display = "inline";
     }
@@ -313,36 +390,60 @@ export default {
     }
     const reviewsCount = this.details.reviews.length;
     this.reviewsCount = reviewsCount;
-    this.img = "http://foo.multivendor.test/" + this.details.images[0].name;
+    if (this.details.images.length > 0) {
+      this.img = "http://foo.multivendor.test/" + this.details.images[0].name;
+    }
     this.sizes = this.details.sizes;
+    this.qty = this.details.cartQty;
     console.log(reviewsCount);
   },
   methods: {
+    updateQty: async function () {
+      await axios
+        .put(
+          "http://foo.multivendor.test/v1/cart/" + 1,
+          {
+            productId: this.details.id,
+            qty: this.qty,
+          },
+          {
+            headers: {
+              Authorization:
+                "Bearer wppO9MjAnIlKDY8LTTGDLZk1oszOrKAuoPhDKlpF1823212b",
+              // origin: "http://localhost:8080",
+            },
+          }
+        )
+        .then((res) => {
+          console.log(res);
+        });
+    },
     addToCart: async function () {
-      this.productIds.push(this.details.id);
-      // await axios
-      //   .post(
-      //     "http://foo.multivendor.test/v1/cart",
-      //     {
-      //       productIds: this.productIds,
-      //     },
-      //     {
-      //       headers: {
-      //         Authorization:
-      //           "Bearer wppO9MjAnIlKDY8LTTGDLZk1oszOrKAuoPhDKlpF1823212b",
-      //         // origin: "http://localhost:8080",
-      //       },
-      //     }
-      //   )
-      //   .then((res) => {
-      //     // res.setHeader(
-      //     //   "Access-Control-Allow-Headers",
-      //     //   "X-Requested-With, content-type"
-      //     // );
-      //     console.log(res);
-      //   });
-      // this.details = res.data;
-      // console.log(this.details.id);
+      // this.productIds.push(this.details.id);
+      this.productId = this.details.id;
+      await axios
+        .post(
+          "http://foo.multivendor.test/v1/cart",
+          {
+            productId: this.productId,
+            qty: this.qty,
+          },
+          {
+            headers: {
+              Authorization:
+                "Bearer wppO9MjAnIlKDY8LTTGDLZk1oszOrKAuoPhDKlpF1823212b",
+              // origin: "http://localhost:8080",
+            },
+          }
+        )
+        .then((res) => {
+          if (res.data.status == 200) {
+            document.getElementById("addToCart").style.display = "none";
+            this.qty = 1;
+            document.getElementById("counter").style.display = "flex";
+          }
+          console.log(res);
+        });
     },
     addToFavourites: async (id) => {
       console.log("test");
@@ -359,19 +460,54 @@ export default {
                 "Bearer wppO9MjAnIlKDY8LTTGDLZk1oszOrKAuoPhDKlpF1823212b",
               Accept: "application/json",
               "Content-Type": "application/json",
-              // "Access-Control-Allow-Origi": "http://192.168.1.12:8080",
               origin: "http://192.168.1.12:8080",
             },
           }
         )
         .then(function (res) {
           console.log(res);
+          if (res.data.status === 200) {
+            console.log("haha");
+            document.getElementById("love").style.color = " #FF0000";
+          } else {
+            document.getElementById("love").style.color = "#708090";
+          }
         })
         .catch(function (error) {
           console.log(error);
         });
     },
+    removeFromCart: async function (id) {
+      await axios
+        .delete("http://foo.multivendor.test/v1/cart/" + id, {
+          headers: {
+            Authorization:
+              "Bearer wppO9MjAnIlKDY8LTTGDLZk1oszOrKAuoPhDKlpF1823212b",
+            // origin: "http://localhost:8080",
+          },
+        })
+        .then(() => {
+          this.$router.go();
+        });
+    },
+    goToCart: function () {
+      this.$router.push("/cart");
+    },
     goToCheckOut: () => {},
+    increaseValue: function () {
+      if (this.details.qty >= this.qty + 1) {
+        this.qty += 1;
+        this.updateQty();
+        // console.log(this.qty);
+      }
+    },
+    decreaseValue: function () {
+      if (this.qty - 2 >= 0) {
+        this.qty--;
+        this.updateQty();
+        // console.log(this.qty);
+      }
+    },
   },
   components: {
     ReviewsComponent,

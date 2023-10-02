@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
         match ($gateWay) {
             'paypal' => $this->app->bind(PaymentGatewayInterface::class, PayPalPaymentController::class),
             'cash-on-deliver' => $this->app->bind(PaymentGatewayInterface::class, CashOnDeliver::class),
+            null => null
         };
     }
 

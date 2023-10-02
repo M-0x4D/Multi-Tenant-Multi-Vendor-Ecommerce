@@ -19,7 +19,7 @@ class AddressController extends Controller
     public function index()
     {
         try {
-            $addresses = ShippingAddress::where('user_id' , auth()->user()->id)->get();
+            $addresses = ShippingAddress::where('user_id' , auth()->user()->id)->with('governrate')->get();
             return handleResponse([
                 'status' => 200,
                 'message' => 'addresses returned successfully',

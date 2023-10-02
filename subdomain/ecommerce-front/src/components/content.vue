@@ -1,5 +1,8 @@
 <template>
-  <div class="flex min-w-[400px] flex-wrap gap-5 p-4 sm:ml-64">
+  <div
+    :key="componentKey"
+    class="flex min-w-[400px] flex-wrap gap-5 p-4 sm:ml-64"
+  >
     <div
       v-for="item in listItems"
       :key="item.id"
@@ -7,7 +10,11 @@
     >
       <img
         class="w-full"
-        :src="this.baseUrl + '/' + item.images[0]['name']"
+        :src="
+          item.images.length > 0
+            ? this.baseUrl + '/' + item.images[0]['name']
+            : ''
+        "
         alt="Sunset in the product"
       />
       <div class="px-6 py-4">
@@ -36,34 +43,104 @@
       </div>
     </div>
   </div>
+
+  <div class="flex justify-center py-8">
+    <div class="flex items-center py-8">
+      <button
+        @click="this.prevPage"
+        class="h-10 w-16 font-semibold text-gray-800 hover:bg-blue-600 hover:text-white text-sm flex items-center justify-center"
+      >
+        Previous
+      </button>
+      <a
+        v-for="page in totalPages"
+        :key="page"
+        href="#"
+        class="h-10 w-10 bg-blue-800 hover:bg-blue-600 font-semibold text-white text-sm flex items-center justify-center"
+        >{{ page }}
+      </a>
+      <button
+        @click="this.nextPage"
+        class="h-10 w-10 font-semibold text-gray-800 hover:bg-blue-600 hover:text-white text-sm flex items-center justify-center"
+      >
+        Next
+      </button>
+    </div>
+  </div>
 </template>
 
 <script>
 import axios from "axios";
-import { makeTest } from "@/components/test.js";
 export default {
   name: "ContentCo",
   props: ["id"],
   data() {
     return {
+      componentKey: 0,
       listItems: [],
+      totalItems: 0,
       baseUrl: "http://foo.multivendor.test",
+      currentPage: 1,
+      itemsPerPage: 1,
+      img: "",
     };
   },
   async mounted() {
-    const res = await axios.get("http://foo.multivendor.test/v1/product");
+    const config = {
+      headers: {
+        Origin: "http://localhost:8080",
+      },
+    };
+    const res = await axios.get(
+      "http://foo.multivendor.test/v1/product",
+      config
+    );
     this.listItems = res.data.data.data;
-    console.log(this.listItems[0]["images"][0]["name"]);
-    this.$store.state.lo = "suuuu";
-    makeTest();
-    console.log(this.token);
+    this.currentPage = res.data.data.current_page;
+    this.itemsPerPage = res.data.data.per_page;
+    this.totalItems = res.data.data.total;
   },
   computed: {
-    token() {
-      return this.$store.state.token;
+    totalPages() {
+      return Math.ceil(this.totalItems / this.itemsPerPage);
     },
-    lo() {
-      return this.$store.state.lo;
+  },
+  updated() {
+    if (this.$store.state.search) {
+      this.listItems = this.$store.state.search;
+      this.componentKey += 1;
+    }
+  },
+  methods: {
+    async paginate() {
+      const config = {
+        headers: {
+          Origin: "http://localhost:8080",
+        },
+      };
+      await axios
+        .get(
+          `http://foo.multivendor.test/v1/product?page=${this.currentPage}`,
+          config
+        )
+        .then((res) => {
+          this.listItems = res.data.data.data;
+          this.currentPage = res.data.data.current_page;
+          this.itemsPerPage = res.data.data.per_page;
+        });
+    },
+    nextPage: function () {
+      // console.log(this.totalPages);
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.paginate();
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.paginate();
+      }
     },
   },
 };
