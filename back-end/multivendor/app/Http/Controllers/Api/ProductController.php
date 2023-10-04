@@ -13,6 +13,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -23,13 +24,33 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            return handleResponse([
-                'status' => 200,
-                'errors' => null,
-                'message' => 'products returned successfully',
-                'result' => 'success',
-                'data' => Product::with('images')->paginate(10),
-            ]);
+            $redisProducts = false;
+            // Redis::del('products');
+            if (!request()->input('page')) {
+                # code...
+                $redisProducts = json_decode(Redis::get('products'), true);
+            }
+            if (!!$redisProducts) {
+                return handleResponse([
+                    'status' => 200,
+                    'errors' => null,
+                    'message' => 'products returned successfully from redis',
+                    'result' => 'success',
+                    'data' =>$redisProducts,
+                ]);
+            } else {
+
+                $products = Product::with('images')->paginate(10);
+                // $redisProducts = Product::with('images')->get();
+                Redis::set('products', json_encode($products));
+                return handleResponse([
+                    'status' => 200,
+                    'errors' => null,
+                    'message' => 'products returned successfully',
+                    'result' => 'success',
+                    'data' => $products,
+                ]);
+            }
         } catch (\Throwable $th) {
             //throw $th;
             return $th->getMessage();
@@ -192,7 +213,7 @@ class ProductController extends Controller
             //code...
             $searchTerm = $request->input('searchTerm');
             $products = Product::with('images')->where('name', 'like', '%' . $searchTerm . '%')
-            ->orWhere('description', 'like', '%' . $searchTerm . '%')->get();
+                ->orWhere('description', 'like', '%' . $searchTerm . '%')->get();
             return handleResponse([
                 'status' => 200,
                 'message' => 'search products returned successfully',
